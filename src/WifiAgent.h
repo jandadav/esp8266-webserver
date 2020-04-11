@@ -2,6 +2,7 @@
 #define WifiInit_h
 #include "Arduino.h"
 #include <ESP8266WiFi.h>
+#include <ESP8266mDNS.h>
 #include "Secrets.h"
 
 class WifiAgent
@@ -9,7 +10,7 @@ class WifiAgent
   public:
     WifiAgent();
     void start();
-
+    void update();
 
   private:
     const char* ssid;
@@ -43,8 +44,21 @@ void WifiAgent::start()
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
 
+  if (!MDNS.begin("mcu")) {
+    Serial.println("Error setting up MDNS responder!");
+    while (1) {
+      delay(1000);
+    }
+  }
+  Serial.println("mDNS responder started");
+
+  MDNS.addService("http", "tcp", 80);
+
 }
 
+void WifiAgent::update() {
+  MDNS.update();
+}
 
 
 #endif
