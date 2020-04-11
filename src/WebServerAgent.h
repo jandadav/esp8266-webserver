@@ -6,23 +6,27 @@
 class WebServerAgent
 {
 public:
+    AsyncWebServer *server;
     WebServerAgent();
+    void begin();
 };
 
 WebServerAgent::WebServerAgent()
 {
-    AsyncWebServer server(80);
+    server = new AsyncWebServer(80);
+}
 
-    server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
-        String responseText = "{\"value\": \"";
-        responseText += "Not implemented";
-        responseText += "\"}";
-        AsyncWebServerResponse *response = request->beginResponse(200, "application/json", responseText);
-        response->addHeader("Access-Control-Allow-Origin", "*");
-        request->send(response);
+void WebServerAgent::begin()
+{
+    Serial.println("Adding [GET] / handler");
+    server->on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send(200, "text/plain", "Hello, world");
     });
 
-    server.begin();
+    Serial.println("Adding 404 handler");
+    server->onNotFound( [](AsyncWebServerRequest* r) {r->send(404, "text/plain", "Not found");} );
+    server->begin();
+    Serial.println("WebServerAgent started");
 }
 
 #endif
