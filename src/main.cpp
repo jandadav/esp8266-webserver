@@ -12,7 +12,7 @@ void setup(void) {
   Serial.println("Serial started");
   wifiAgent.start();
   webServerAgent.begin();
-
+  webServerAgent.commandHandler.addCommandCallback("simple", [](String c) { return (String) ("Hi Handler "+c);});
 }
 
 void loop(void) {
