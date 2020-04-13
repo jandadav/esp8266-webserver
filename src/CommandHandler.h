@@ -11,7 +11,6 @@ private:
     String keyList[100];
     String (*functionList[100]) (String);
     int callbacksStored = 0;
-    
 };
 
 String CommandHandler::handle(String command)
