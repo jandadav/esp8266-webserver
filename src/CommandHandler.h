@@ -20,9 +20,9 @@ String CommandHandler::handle(String command)
     String output = "No handler found";
     for (int i = 0; i < callbacksStored; i++){
         Serial.println("Looking up callback: " + keyList[i]);
-        if(keyList[i] == command) {
+        if( command.startsWith(keyList[i]) ) {
             Serial.println("Found match, executing: " + keyList[i]);
-            output =  (*functionList[i]) (command); 
+            output =  (*functionList[i]) ( command.substring(keyList[i].length() + 1) ); 
             break;
         }
     }
@@ -30,7 +30,7 @@ String CommandHandler::handle(String command)
 };
 
 void CommandHandler::addCommandCallback(String command, String (*f) (String)) {
-    // handle uniqueness of keys
+    // TODO: handle uniqueness of keys
     keyList[callbacksStored] = command;
     functionList[callbacksStored] = f;
     callbacksStored++;
