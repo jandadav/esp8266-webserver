@@ -84,7 +84,7 @@ void setup(void) {
   webServerAgent.commandHandler.addCommandCallback("simple", [](String c) { return (String) ("simple command handler receiving: "+c);});
   webServerAgent.commandHandler.addCommandCallback("dummy", [](String c) { return (String) ("dummy command handler receiving: "+c);});
   webServerAgent.commandHandler.addCommandCallback("logger", [](String c) { callMyLoggerWithAppender(_logger); return (String) ("logger issued");});
-  webServerAgent.commandHandler.addCommandCallback("loggerread", [](String c) { readLogFile(); return (String) ("loggerread issued");});
+  webServerAgent.commandHandler.addCommandCallback("logread", [](String c) { readLogFile(); return (String) ("loggerread issued");});
 }
 
 void loop(void) {

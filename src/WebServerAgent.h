@@ -7,6 +7,7 @@
 #include "CommandHandler.h"
 
 const String PARAM_COMMAND = "command";
+const String PARAM_FILE = "file";
 
 class WebServerAgent
 {
@@ -39,6 +40,24 @@ void WebServerAgent::begin()
         root["ssid"] = WiFi.SSID();
         response->setLength();
         request->send(response);
+    });
+
+    Serial.println("Adding [GET] '/fs' handler");
+    server->on("/fs", HTTP_GET, [](AsyncWebServerRequest *request) {
+        if (request->hasParam(PARAM_FILE)) {
+            String param = request->getParam(PARAM_FILE)->value();
+            Serial.println("/fs requesting file: "+param);
+            if (SPIFFS.exists(param)) {
+                AsyncWebServerResponse *response = request->beginResponse(SPIFFS, param);
+                response->addHeader("Access-Control-Allow-Origin", "*");
+                request->send(response);
+            } else {
+                request->send(404, "text/plain", "File '" + param + "' not found on fs");
+            }
+        } else {
+            request->send(400, "text/plain", "Query parameter 'file' missing");
+        }
+        
     });
 
     Serial.println("Adding [POST] '/command' handler");
