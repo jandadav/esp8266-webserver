@@ -51,14 +51,11 @@ void WifiAgent::start()
     }
   }
   Serial.println("mDNS responder started");
-
   MDNS.addService("http", "tcp", 80);
-
 }
 
 void WifiAgent::update() {
   MDNS.update();
 }
-
 
 #endif

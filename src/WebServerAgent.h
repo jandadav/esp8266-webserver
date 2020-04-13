@@ -47,8 +47,8 @@ void WebServerAgent::begin()
         if (request->hasParam(PARAM_COMMAND, true))
         {
             String command = request->getParam(PARAM_COMMAND, true)->value();
-            commandHandler.handle(command);
-            AsyncWebServerResponse *response = request->beginResponse(204, "text/plain");
+            String commandOutput = commandHandler.handle(command);
+            AsyncWebServerResponse *response = request->beginResponse(200, "text/plain", commandOutput);
             response->addHeader("Access-Control-Allow-Origin", "*");
             request->send(response);
         }
