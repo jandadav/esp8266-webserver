@@ -1,35 +1,28 @@
 #ifndef CommandHandler_h
 #define CommandHandler_h
 #include <Arduino.h>
+
 class CommandHandler
 {
 public:
     String handle(String command);
     void addCommandCallback(String command, String (*f) (String) );
 private:
+    String keyList[100];
+    String (*functionList[100]) (String);
+    int callbacksStored = 0;
     
-    struct callback {
-        String key;
-        String (*f) (String);
-    };
-    
-    struct callback callbackList[100];
-    int numCallbacks = 0;
 };
-
-
 
 String CommandHandler::handle(String command)
 {
     Serial.println("Handling command: " + command);
     String output = "No handler found";
-    // TODO this should use Vector instead of struct array
-    for (size_t i = 0; i < sizeof(callbackList); i++)
-    {
-        Serial.println("Looking up command: " + callbackList[i].key);
-        if (callbackList[i].key == command) {
-            Serial.println("Executing command function");
-            output = callbackList[i].f(command);
+    for (int i = 0; i < callbacksStored; i++){
+        Serial.println("Looking up callback: " + keyList[i]);
+        if(keyList[i] == command) {
+            Serial.println("Found match, executing: " + keyList[i]);
+            output =  (*functionList[i]) (command); 
             break;
         }
     }
@@ -37,10 +30,11 @@ String CommandHandler::handle(String command)
 };
 
 void CommandHandler::addCommandCallback(String command, String (*f) (String)) {
-    struct callback c {command, f};
-    callbackList[numCallbacks] = c;
-    numCallbacks++;
-    Serial.println("Added command callback: " + command + " total commands: "+numCallbacks);
+    // handle uniqueness of keys
+    keyList[callbacksStored] = command;
+    functionList[callbacksStored] = f;
+    callbacksStored++;
+    Serial.println("Added command callback: '" + command + "', total commands: " + callbacksStored);
 };
 
 #endif
