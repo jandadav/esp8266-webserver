@@ -14,8 +14,10 @@ void setup(void) {
   while (!Serial && !Serial.available()) {};
   delay(300);
   Serial.println();
-  SPIFFS.begin();
+
   logHandler.beginRollingFile();
+  LOG.verbose(F("=== SYSTEM STARTING ==="));
+
   wifiAgent.start();
   webServerAgent.begin();
 
@@ -24,8 +26,6 @@ void setup(void) {
   webServerAgent.commandHandler.addCommandCallback("testPrintf", [](String c) { logHandler.testPrintf(); return (String) ("testPrintf issued");});
   webServerAgent.commandHandler.addCommandCallback("readLogFile", [](String c) { logHandler.readLogFile(); return (String) ("Printing /system.log to serial");});
   webServerAgent.commandHandler.addCommandCallback("clearLogFile", [](String c) { logHandler.clearLogFile(); return (String) ("Clearing /system.log");});
-
-
 }
 
 void loop(void) {

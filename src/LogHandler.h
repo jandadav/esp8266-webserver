@@ -2,6 +2,7 @@
 #define Logger_h
 #include <stdarg.h>
 #include <Log4Esp.h>
+#include "CustomFileAppender.h"
 
 // Logger logger;
 const char *FILENAME = "/system.log";
@@ -15,7 +16,7 @@ class LogHandler {
 };
 
 void LogHandler::beginRollingFile() {
-    LOG.getAppender().push_back(new RollingFileAppender(FILENAME, 60, 1000, true));
+  LOG.getAppender().push_back(new CustomFileAppender(FILENAME, 6000));
 }
 
 void LogHandler::clearLogFile() {
@@ -38,7 +39,6 @@ void LogHandler::readLogFile() {
 }
 
 void LogHandler::testPrintf() {
-  // http://www.cplusplus.com/reference/cstdio/printf/
 
   int d = 392;
   uint16_t u = 7235;
