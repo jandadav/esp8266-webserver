@@ -12,6 +12,8 @@ class WifiAgent
     WifiAgent();
     void start();
     void update();
+    void disconnect();
+    void reconnect();
 
   private:
     const char* ssid;
@@ -50,8 +52,17 @@ void WifiAgent::start()
   MDNS.addService("http", "tcp", 80);
 }
 
+void WifiAgent::disconnect() {
+  WiFi.disconnect();
+  LOG.verbose(F("Disconnected from wifi"));  
+}
+
 void WifiAgent::update() {
   MDNS.update();
+}
+
+void WifiAgent::reconnect() {
+  WiFi.begin(ssid, password);
 }
 
 #endif
