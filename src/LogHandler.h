@@ -17,6 +17,23 @@ class LogHandler {
 
 void LogHandler::beginRollingFile() {
   LOG.getAppender().push_back(new CustomFileAppender(FILENAME, 6000));
+  //tracing filter
+  LOG.addLevelToAll(Appender::VERBOSE);
+  //time formatter
+  LOG.addFormatterToAll(
+    [](Print &output, Appender::Level level, const char *msg, va_list *args) { 
+        output.print(F("["));
+        output.print(millis());  
+        output.print(F("] "));
+        output.print(F("["));
+        output.print(Appender::toString(level, true));
+        output.print(F("] "));
+        size_t length = vsnprintf(NULL, 0, msg, *args) + 1;
+        char buffer[length];
+        vsnprintf(buffer, length, msg, *args);
+        output.print(buffer);
+    }
+  );
 }
 
 void LogHandler::clearLogFile() {
