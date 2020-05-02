@@ -1,6 +1,7 @@
 #ifndef CommandHandler_h
 #define CommandHandler_h
 #include <Arduino.h>
+#include "LogHandler.h"
 
 class CommandHandler
 {
@@ -15,13 +16,12 @@ private:
 
 String CommandHandler::handle(String command)
 {
-    String commandKey = command.substring(0, command.indexOf(' '));
-    Serial.println("Handling command: '" + command + "', identified as '" + commandKey + "'");
-    String output = "No handler found";
+    LOG.verbose(F("Handling command: %s"), command.c_str());
+    String output = F("No handler found");
     for (int i = 0; i < callbacksStored; i++){
-        Serial.println("Looking up callback: " + keyList[i]);
-        if( commandKey == keyList[i] ) {
-            Serial.println("Found match, executing: " + keyList[i]);
+        LOG.trace(F("Looking up callback: %s"), keyList[i].c_str());
+        if( command.startsWith(keyList[i]) ) {
+            LOG.trace(F("Found match, executing: %s"), keyList[i].c_str());
             output =  (*functionList[i]) ( command.substring(keyList[i].length() + 1) ); 
             break;
         }
@@ -34,7 +34,7 @@ void CommandHandler::addCommandCallback(String command, String (*f) (String)) {
     keyList[callbacksStored] = command;
     functionList[callbacksStored] = f;
     callbacksStored++;
-    Serial.println("Added command callback: '" + command + "', total commands: " + callbacksStored);
+    LOG.verbose(F("Added command callback: %s, total: %d"),command.c_str(), callbacksStored);
 };
 
 #endif

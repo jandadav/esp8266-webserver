@@ -1,9 +1,10 @@
 #ifndef WifiInit_h
 #define WifiInit_h
-#include "Arduino.h"
+#include <Arduino.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>
 #include "Secrets.h"
+#include "LogHandler.h"
 
 class WifiAgent
 {
@@ -26,31 +27,26 @@ WifiAgent::WifiAgent()
 
 void WifiAgent::start()
 {
-
-  Serial.println("WifiAgent start called");
+  LOG.verbose(F("WifiAgent start called"));
 
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
-  Serial.println("");
 
   while (WiFi.status() != WL_CONNECTED)
   {
     delay(500);
-    Serial.print(".");
+    LOG.verbose(F("."));  
   }
-  Serial.println("");
-  Serial.print("Connected to ");
-  Serial.println(ssid);
-  Serial.print("IP address: ");
-  Serial.println(WiFi.localIP());
-
+  LOG.verbose(F("Connected to %s"), ssid);
+  String ip = WiFi.localIP().toString();
+  LOG.verbose(F("IP address: %s"), ip.c_str());
   if (!MDNS.begin("mcu")) {
-    Serial.println("Error setting up MDNS responder!");
+    LOG.error(F("Error setting up MDNS responder!"));
     while (1) {
       delay(1000);
     }
   }
-  Serial.println("mDNS responder started");
+  LOG.verbose(F("mDNS responder started"));
   MDNS.addService("http", "tcp", 80);
 }
 

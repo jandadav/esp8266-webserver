@@ -5,8 +5,10 @@
 #include "AsyncJson.h"
 #include "ArduinoJson.h"
 #include "CommandHandler.h"
+#include "LogHandler.h"
 
 const String PARAM_COMMAND = "command";
+const String PARAM_FILE = "file";
 
 class WebServerAgent
 {
@@ -24,12 +26,12 @@ WebServerAgent::WebServerAgent()
 
 void WebServerAgent::begin()
 {
-    Serial.println("Adding [GET] '/' handler");
+    LOG.verbose(F("Adding [GET] '/' handler"));
     server->on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
         request->send(200, "text/plain", "Hello from MCU");
     });
 
-    Serial.println("Adding [GET] '/data' handler");
+    LOG.verbose(F("Adding [GET] '/data' handler"));
     server->on("/data", HTTP_GET, [](AsyncWebServerRequest *request) {
         AsyncJsonResponse *response = new AsyncJsonResponse();
         response->addHeader("Access-Control-Allow-Origin", "*");
@@ -41,7 +43,25 @@ void WebServerAgent::begin()
         request->send(response);
     });
 
-    Serial.println("Adding [POST] '/command' handler");
+    LOG.verbose(F("Adding [GET] '/fs' handler"));
+    server->on("/fs", HTTP_GET, [](AsyncWebServerRequest *request) {
+        if (request->hasParam(PARAM_FILE)) {
+            String param = request->getParam(PARAM_FILE)->value();
+            LOG.trace(F("/fs requesting file: %s"), param.c_str());
+            if (SPIFFS.exists(param)) {
+                AsyncWebServerResponse *response = request->beginResponse(SPIFFS, param);
+                response->addHeader("Access-Control-Allow-Origin", "*");
+                request->send(response);
+            } else {
+                request->send(404, "text/plain", "File '" + param + "' not found on fs");
+            }
+        } else {
+            request->send(400, "text/plain", "Query parameter 'file' missing");
+        }
+        
+    });
+
+    LOG.verbose(F("Adding [POST] '/command' handler"));
     server->on("/command", HTTP_POST, [this](AsyncWebServerRequest *request) {
         
         if (request->hasParam(PARAM_COMMAND, true))
@@ -60,10 +80,10 @@ void WebServerAgent::begin()
         }
     });
 
-    Serial.println("Adding 404 handler");
+    LOG.verbose(F("Adding 404 handler"));
     server->onNotFound([](AsyncWebServerRequest *r) { r->send(404, "text/plain", "Not found"); });
     server->begin();
-    Serial.println("WebServerAgent started");
+    LOG.verbose(F("WebServerAgent started"));
 }
 
 #endif
