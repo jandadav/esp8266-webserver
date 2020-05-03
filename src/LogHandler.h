@@ -3,6 +3,7 @@
 #include <stdarg.h>
 #include <Log4Esp.h>
 #include "CustomFileAppender.h"
+#include "TimeHandler.h"
 
 // Logger logger;
 const char *FILENAME = "/system.log";
@@ -16,15 +17,16 @@ class LogHandler {
 };
 
 void LogHandler::beginRollingFile() {
-  LOG.getAppender().push_back(new CustomFileAppender(FILENAME, 6000));
+  // roughly 100k file
+  LOG.getAppender().push_back(new CustomFileAppender(FILENAME, 100000));
   //tracing filter
   LOG.addLevelToAll(Appender::VERBOSE);
   //time formatter
   LOG.addFormatterToAll(
     [](Print &output, Appender::Level level, const char *msg, va_list *args) { 
         output.print(F("["));
-        output.print(millis());  
-        output.print(F("] "));
+        output.print(now());  
+        output.print(F(" "));
         output.print(F("["));
         output.print(Appender::toString(level, true));
         output.print(F("] "));
