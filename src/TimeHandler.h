@@ -13,6 +13,7 @@ const int timeZone = 1;
 const unsigned int localPort = 8888;
 
 WiFiUDP Udp;
+time_t dummy();
 
 class TimeHandler {
 public:
@@ -22,29 +23,45 @@ public:
     void printDigits(int digits);
     void digitalClockDisplay();
     void logTime();
+
 private:
     byte packetBuffer[NTP_PACKET_SIZE]; //buffer to hold incoming & outgoing packets
     bool shouldUpdate = false;
     bool shouldSet = false;
     void sendNTPpacket(IPAddress &address);
+    void updateTimeFromNtp();
 };
 
 void TimeHandler::start() {
     Udp.begin(localPort);
-    // setSyncProvider(getNtpTime); take care on our own
-    setSyncInterval(20);
+    setSyncProvider(dummy);
+    setSyncInterval(86400);
     update();
+}
+
+time_t dummy() {
+    return 0;
+}
+
+//update time when can get NTP, or dummy update to trigger update and delay next retry
+void TimeHandler::updateTimeFromNtp() {
+    time_t retrievedTime = getNtpTime();
+    if (retrievedTime != 0) {
+        setTime(retrievedTime);
+    } else {
+        setTime(now());
+    }
 }
 
 void TimeHandler::update() {
     switch (timeStatus()){
         case timeStatus_t::timeNotSet:
             LOG.verbose(F("Time status: Not Set, update time"));
-            setTime(getNtpTime());
+            updateTimeFromNtp();
             break;
         case timeStatus_t::timeNeedsSync:
             LOG.verbose(F("Time status: Need Sync, update time"));
-            setTime(getNtpTime());
+            updateTimeFromNtp();
             break;
         case timeStatus_t::timeSet:
             break;

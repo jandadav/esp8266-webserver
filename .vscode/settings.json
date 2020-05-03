@@ -12,6 +12,9 @@
         "*.tcc": "cpp",
         "istream": "cpp",
         "ostream": "cpp",
-        "fstream": "cpp"
+        "fstream": "cpp",
+        "chrono": "cpp",
+        "ctime": "cpp",
+        "mutex": "cpp"
     }
 }
