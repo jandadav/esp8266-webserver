@@ -5,6 +5,7 @@
 #include <TimeLib.h>
 #include <WiFiUdp.h>
 #include "WifiAgent.h"
+#include "LogHandler.h"
 
 static const char ntpServerName[] = "cz.pool.ntp.org";
 const int NTP_PACKET_SIZE = 48; // NTP time is in the first 48 bytes of message
@@ -20,6 +21,7 @@ public:
     time_t getNtpTime();
     void printDigits(int digits);
     void digitalClockDisplay();
+    void logTime();
 private:
     byte packetBuffer[NTP_PACKET_SIZE]; //buffer to hold incoming & outgoing packets
     bool shouldUpdate = false;
@@ -37,15 +39,14 @@ void TimeHandler::start() {
 void TimeHandler::update() {
     switch (timeStatus()){
         case timeStatus_t::timeNotSet:
-            Serial.println("Time status: Not Set");
+            LOG.verbose(F("Time status: Not Set, update time"));
             setTime(getNtpTime());
             break;
         case timeStatus_t::timeNeedsSync:
-            Serial.println("Time status: Need Sync");
+            LOG.verbose(F("Time status: Need Sync, update time"));
             setTime(getNtpTime());
             break;
         case timeStatus_t::timeSet:
-            // Serial.println("Time status: Time Set"); no spam
             break;
         }
 }
@@ -53,18 +54,16 @@ void TimeHandler::update() {
 time_t TimeHandler::getNtpTime() {
     IPAddress ntpServerIP; // NTP server's ip address
     while (Udp.parsePacket() > 0) ; // discard any previously received packets
-    Serial.println("Transmit NTP Request");
+    LOG.verbose(F("Transmit NTP Request"));
     // get a random server from the pool
     WiFi.hostByName(ntpServerName, ntpServerIP);
-    Serial.print(ntpServerName);
-    Serial.print(": ");
-    Serial.println(ntpServerIP);
+    LOG.verbose(F("%s: %s"), ntpServerName, ntpServerIP.toString().c_str());
     sendNTPpacket(ntpServerIP);
     uint32_t beginWait = millis();
     while (millis() - beginWait < 1500) {
     int size = Udp.parsePacket();
     if (size >= NTP_PACKET_SIZE) {
-        Serial.println("Receive NTP Response");
+        LOG.verbose(F("Receive NTP Response"));
         Udp.read(packetBuffer, NTP_PACKET_SIZE);  // read packet into the buffer
         unsigned long secsSince1900;
         // convert four bytes starting at location 40 to a long integer
@@ -75,7 +74,7 @@ time_t TimeHandler::getNtpTime() {
         return secsSince1900 - 2208988800UL + timeZone * SECS_PER_HOUR;
     }
 }
-Serial.println("No NTP Response :-(");
+LOG.error(F("No NTP Response"));
 return 0; // return 0 if unable to get the time
 }
 
@@ -98,6 +97,10 @@ void TimeHandler::digitalClockDisplay() {
     Serial.print(".");
     Serial.print(year());
     Serial.println();
+}
+
+void TimeHandler::logTime() {
+    LOG.verbose(F("Current Time: %02d:%02d:%02d %02d.%02d.%d"), hour(), minute(), second(), day(), month(), year());
 }
 
 void TimeHandler::sendNTPpacket(IPAddress &address) {

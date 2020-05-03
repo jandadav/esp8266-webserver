@@ -31,7 +31,7 @@ void setup(void) {
   webServerAgent.commandHandler.addCommandCallback("readLogFile", [](String c) { logHandler.readLogFile(); return (String) ("Printing /system.log to serial");});
   webServerAgent.commandHandler.addCommandCallback("clearLogFile", [](String c) { logHandler.clearLogFile(); return (String) ("Clearing /system.log. Restart device");});
   webServerAgent.commandHandler.addCommandCallback("disconnect", [](String c) { wifiAgent.disconnect(); return (String) ("Disconnecting Wifi");});
-  webServerAgent.commandHandler.addCommandCallback("time", [](String c) { timeHandler.digitalClockDisplay(); return (String) ("Printing time"); });
+  webServerAgent.commandHandler.addCommandCallback("time", [](String c) { timeHandler.logTime(); return (String) ("Printing time"); });
   // webServerAgent.commandHandler.addCommandCallback("callNtp", [](String c) { shouldUpdate=true; return (String) ("Calling NTP"); });
   // webServerAgent.commandHandler.addCommandCallback("setTime", [](String c) { shouldSet=true; return (String) ("Calling NTP"); });
 }
