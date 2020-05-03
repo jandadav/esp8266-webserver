@@ -20,8 +20,6 @@ public:
     void start();
     void update();
     time_t getNtpTime();
-    void printDigits(int digits);
-    void digitalClockDisplay();
     void logTime();
 
 private:
@@ -93,27 +91,6 @@ time_t TimeHandler::getNtpTime() {
 }
 LOG.error(F("No NTP Response"));
 return 0; // return 0 if unable to get the time
-}
-
-void TimeHandler::printDigits(int digits) {
-    // utility for digital clock display: prints preceding colon and leading 0
-    Serial.print(":");
-    if (digits < 10) Serial.print('0');
-    Serial.print(digits);
-}
-
-void TimeHandler::digitalClockDisplay() {
-    // digital clock display of the time
-    Serial.print(hour());
-    printDigits(minute());
-    printDigits(second());
-    Serial.print(" ");
-    Serial.print(day());
-    Serial.print(".");
-    Serial.print(month());
-    Serial.print(".");
-    Serial.print(year());
-    Serial.println();
 }
 
 void TimeHandler::logTime() {
