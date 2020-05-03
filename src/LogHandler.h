@@ -24,12 +24,9 @@ void LogHandler::beginRollingFile() {
   //time formatter
   LOG.addFormatterToAll(
     [](Print &output, Appender::Level level, const char *msg, va_list *args) { 
-        output.print(F("["));
         output.print(now());  
         output.print(F(" "));
-        output.print(F("["));
         output.print(Appender::toString(level, true));
-        output.print(F("] "));
         size_t length = vsnprintf(NULL, 0, msg, *args) + 1;
         char buffer[length];
         vsnprintf(buffer, length, msg, *args);
