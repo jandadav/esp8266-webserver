@@ -27,6 +27,7 @@ void LogHandler::beginRollingFile() {
         output.print(now());  
         output.print(F(" "));
         output.print(Appender::toString(level, true));
+        output.print(F(" "));
         size_t length = vsnprintf(NULL, 0, msg, *args) + 1;
         char buffer[length];
         vsnprintf(buffer, length, msg, *args);

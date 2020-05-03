@@ -34,7 +34,12 @@ void TimeHandler::start() {
     Udp.begin(localPort);
     setSyncProvider(dummy);
     setSyncInterval(86400);
-    update();
+    
+    // ensure successfull time update on startup
+    LOG.verbose(F("Set NTP time"));
+    while(now() < 10000) {
+        updateTimeFromNtp();
+    }
 }
 
 time_t dummy() {
