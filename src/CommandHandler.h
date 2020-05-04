@@ -34,7 +34,7 @@ void CommandHandler::addCommandCallback(String command, String (*f) (String)) {
     keyList[callbacksStored] = command;
     functionList[callbacksStored] = f;
     callbacksStored++;
-    LOG.verbose(F("Added command callback: %s, total: %d"),command.c_str(), callbacksStored);
+    LOG.trace(F("Added command callback: %s, total: %d"),command.c_str(), callbacksStored);
 };
 
 #endif

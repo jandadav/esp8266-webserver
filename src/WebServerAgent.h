@@ -26,12 +26,12 @@ WebServerAgent::WebServerAgent()
 
 void WebServerAgent::begin()
 {
-    LOG.verbose(F("Adding [GET] '/' handler"));
+    LOG.trace(F("Adding [GET] '/' handler"));
     server->on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
         request->send(200, "text/plain", "Hello from MCU");
     });
 
-    LOG.verbose(F("Adding [GET] '/data' handler"));
+    LOG.trace(F("Adding [GET] '/data' handler"));
     server->on("/data", HTTP_GET, [](AsyncWebServerRequest *request) {
         AsyncJsonResponse *response = new AsyncJsonResponse();
         response->addHeader("Access-Control-Allow-Origin", "*");
@@ -43,7 +43,7 @@ void WebServerAgent::begin()
         request->send(response);
     });
 
-    LOG.verbose(F("Adding [GET] '/fs' handler"));
+    LOG.trace(F("Adding [GET] '/fs' handler"));
     server->on("/fs", HTTP_GET, [](AsyncWebServerRequest *request) {
         if (request->hasParam(PARAM_FILE)) {
             String param = request->getParam(PARAM_FILE)->value();
@@ -61,7 +61,7 @@ void WebServerAgent::begin()
         
     });
 
-    LOG.verbose(F("Adding [POST] '/command' handler"));
+    LOG.trace(F("Adding [POST] '/command' handler"));
     server->on("/command", HTTP_POST, [this](AsyncWebServerRequest *request) {
         
         if (request->hasParam(PARAM_COMMAND, true))
@@ -80,7 +80,7 @@ void WebServerAgent::begin()
         }
     });
 
-    LOG.verbose(F("Adding 404 handler"));
+    LOG.trace(F("Adding 404 handler"));
     server->onNotFound([](AsyncWebServerRequest *r) { r->send(404, "text/plain", "Not found"); });
     server->begin();
     LOG.verbose(F("WebServerAgent started"));
