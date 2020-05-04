@@ -4,6 +4,8 @@
 #include <FS.h> 
 #include "LogHandler.h"
 #include "TimeHandler.h"
+#include "OtaHandler.h"
+
 
 WifiAgent wifiAgent;
 WebServerAgent webServerAgent;
@@ -32,11 +34,14 @@ void setup(void) {
   webServerAgent.commandHandler.addCommandCallback("clearLogFile", [](String c) { logHandler.clearLogFile(); return (String) ("Clearing /system.log. Restart device");});
   webServerAgent.commandHandler.addCommandCallback("disconnect", [](String c) { wifiAgent.disconnect(); return (String) ("Disconnecting Wifi");});
   webServerAgent.commandHandler.addCommandCallback("time", [](String c) { timeHandler.logTime(); return (String) ("Printing time"); });
-  LOG.verbose(F("=== STARTUP COMPLETE ==="));
+
+  OtaStart("mcu");
+
+  LOG.verbose(F("=== STARTUP COMPLETE OTA ==="));
 }
 
 void loop(void) {
-  wifiAgent.update();
   timeHandler.update();
+  OtaUpdate();
   delay(200);
 }

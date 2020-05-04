@@ -2,7 +2,7 @@
 #define WifiInit_h
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
-#include <ESP8266mDNS.h>
+//#include <ESP8266mDNS.h>
 #include "Secrets.h"
 #include "LogHandler.h"
 
@@ -47,14 +47,14 @@ void WifiAgent::start()
   LOG.verbose(F("Connected to %s"), ssid);
   String ip = WiFi.localIP().toString();
   LOG.verbose(F("IP address: %s"), ip.c_str());
-  if (!MDNS.begin("mcu")) {
-    LOG.error(F("Error setting up MDNS responder!"));
-    while (1) {
-      delay(1000);
-    }
-  }
-  LOG.verbose(F("mDNS responder started"));
-  MDNS.addService("http", "tcp", 80);
+  // if (!MDNS.begin("mcu")) {
+  //   LOG.error(F("Error setting up MDNS responder!"));
+  //   while (1) {
+  //     delay(1000);
+  //   }
+  // }
+  //LOG.verbose(F("mDNS responder started"));
+  //MDNS.addService("http", "tcp", 80);
 
   //Disconnect event handler
   disconnectedEventHandler = WiFi.onStationModeDisconnected([this](const WiFiEventStationModeDisconnected& event)
@@ -76,7 +76,7 @@ void WifiAgent::disconnect() {
 }
 
 void WifiAgent::update() {
-  MDNS.update();
+  //MDNS.update();
 }
 
 #endif
