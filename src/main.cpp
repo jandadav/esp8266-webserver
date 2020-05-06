@@ -37,7 +37,7 @@ void setup(void) {
 
   OtaStart("mcu");
 
-  LOG.verbose(F("=== STARTUP COMPLETE OTA ==="));
+  LOG.verbose(F("=== STARTUP COMPLETE ==="));
 }
 
 void loop(void) {

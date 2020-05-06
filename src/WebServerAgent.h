@@ -9,6 +9,7 @@
 
 const String PARAM_COMMAND = "command";
 const String PARAM_FILE = "file";
+const String SETTINGS_FILE = "/config.json";
 
 class WebServerAgent
 {
@@ -28,13 +29,13 @@ void WebServerAgent::begin()
 {
     LOG.trace(F("Adding [GET] '/' handler"));
     server->on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
-        request->send(200, "text/plain", "Hello from MCU");
+        request->send(200, F("text/plain"), F("Hello from MCU"));
     });
 
     LOG.trace(F("Adding [GET] '/data' handler"));
     server->on("/data", HTTP_GET, [](AsyncWebServerRequest *request) {
         AsyncJsonResponse *response = new AsyncJsonResponse();
-        response->addHeader("Access-Control-Allow-Origin", "*");
+        response->addHeader(F("Access-Control-Allow-Origin"), "*");
         JsonVariant &root = response->getRoot();
         root["heap"] = ESP.getFreeHeap();
         root["vcc"] = ESP.getVcc();
@@ -50,15 +51,33 @@ void WebServerAgent::begin()
             LOG.trace(F("/fs requesting file: %s"), param.c_str());
             if (SPIFFS.exists(param)) {
                 AsyncWebServerResponse *response = request->beginResponse(SPIFFS, param);
-                response->addHeader("Access-Control-Allow-Origin", "*");
+                response->addHeader(F("Access-Control-Allow-Origin"), "*");
                 request->send(response);
             } else {
-                request->send(404, "text/plain", "File '" + param + "' not found on fs");
+                request->send(404, F("text/plain"), "File '" + param + "' not found on fs");
             }
         } else {
-            request->send(400, "text/plain", "Query parameter 'file' missing");
+            request->send(400, F("text/plain"), "Query parameter 'file' missing");
         }
         
+    });
+
+    LOG.trace(F("Adding [DELETE] '/fs' handler"));
+    server->on("/fs", HTTP_DELETE, [](AsyncWebServerRequest *request) {
+        if (request->hasParam(PARAM_FILE)) {
+            String param = request->getParam(PARAM_FILE)->value();
+            if (SPIFFS.exists(param)) {
+                LOG.verbose(F("/fs deleting file: %s"), param.c_str());
+                SPIFFS.remove(param);
+                AsyncWebServerResponse *response = request->beginResponse(200, "text/plain", "File " + param + " deleted");
+                response->addHeader(F("Access-Control-Allow-Origin"), F("*"));
+                request->send(response);
+            } else {
+                request->send(404, F("text/plain"), "File '" + param + "' not found on fs");
+            }
+        } else {
+            request->send(400, F("text/plain"), "Query parameter 'file' missing");
+        }
     });
 
     LOG.trace(F("Adding [POST] '/command' handler"));
@@ -68,20 +87,32 @@ void WebServerAgent::begin()
         {
             String command = request->getParam(PARAM_COMMAND, true)->value();
             String commandOutput = commandHandler.handle(command);
-            AsyncWebServerResponse *response = request->beginResponse(200, "text/plain", commandOutput);
-            response->addHeader("Access-Control-Allow-Origin", "*");
+            AsyncWebServerResponse *response = request->beginResponse(200, F("text/plain"), commandOutput);
+            response->addHeader(F("Access-Control-Allow-Origin"), F("*"));
             request->send(response);
         }
         else
         {
-            AsyncWebServerResponse *response = request->beginResponse(400, "text/plain", "'command' parameter not found in request");
-            response->addHeader("Access-Control-Allow-Origin", "*");
+            AsyncWebServerResponse *response = request->beginResponse(400, F("text/plain"), "'command' parameter not found in request");
+            response->addHeader(F("Access-Control-Allow-Origin"), F("*"));
             request->send(response);
         }
     });
 
+    LOG.trace(F("Adding [POST] '/config' handler"));
+    AsyncCallbackJsonWebHandler* handler = new AsyncCallbackJsonWebHandler("/config", [](AsyncWebServerRequest *request, JsonVariant &json) {
+        JsonObject jsonObj = json.as<JsonObject>();
+        File file = SPIFFS.open(SETTINGS_FILE, "w+");
+        serializeJsonPretty(jsonObj, file);
+        request->send(200, F("text/plain"), F("Stored as '/config.json'"));
+        file.flush();
+        file.close();
+    });
+    server->addHandler(handler);
+
+
     LOG.trace(F("Adding 404 handler"));
-    server->onNotFound([](AsyncWebServerRequest *r) { r->send(404, "text/plain", "Not found"); });
+    server->onNotFound([](AsyncWebServerRequest *r) { r->send(404, F("text/plain"), "Not found"); });
     server->begin();
     LOG.verbose(F("WebServerAgent started"));
 }
