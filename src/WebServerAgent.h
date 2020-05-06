@@ -24,7 +24,7 @@ WebServerAgent::WebServerAgent()
 {
     server = new AsyncWebServer(80);
 }
-
+//TODO cors on all responses
 void WebServerAgent::begin()
 {
     LOG.trace(F("Adding [GET] '/' handler"));

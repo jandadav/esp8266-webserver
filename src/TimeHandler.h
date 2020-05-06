@@ -9,7 +9,7 @@
 
 static const char ntpServerName[] = "cz.pool.ntp.org";
 const int NTP_PACKET_SIZE = 48; // NTP time is in the first 48 bytes of message
-const int timeZone = 1;
+const int timeZone = 2;
 const unsigned int localPort = 8888;
 
 WiFiUDP Udp;
@@ -21,6 +21,7 @@ public:
     void update();
     time_t getNtpTime();
     void logTime();
+    void getTime(char* str);
 
 private:
     byte packetBuffer[NTP_PACKET_SIZE]; //buffer to hold incoming & outgoing packets
@@ -100,6 +101,10 @@ return 0; // return 0 if unable to get the time
 
 void TimeHandler::logTime() {
     LOG.verbose(F("Current Time: %02d:%02d:%02d %02d.%02d.%d"), hour(), minute(), second(), day(), month(), year());
+}
+
+void TimeHandler::getTime(char* str) {
+    sprintf(str, "%02d:%02d:%02d %02d.%02d.%d", hour(), minute(), second(), day(), month(), year());
 }
 
 void TimeHandler::sendNTPpacket(IPAddress &address) {
